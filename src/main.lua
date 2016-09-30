@@ -17,9 +17,6 @@ end
 local ships = {}
 local currentShip = Ship()
 table.insert(ships, currentShip)
---TEMPORARY FOR ORBITAL START
-currentShip.y = currentShip.y - p_atmosphere - 13
-currentShip.v.x = 150
 
 local time, tick = 0, 1/30
 
@@ -33,7 +30,7 @@ local function gravity(A)
 end
 
 local function collide(A)
-  d = math.sqrt(A.x*A.x + A.y*A.y)
+  local d = math.sqrt(A.x*A.x + A.y*A.y)
   if d <= p_radius then
     -- need to stop acceleration
     --TODO crash or live based on velocity at impact
@@ -48,10 +45,12 @@ end
 
 -- this updates the angle relative to planet
 local function angle(A)
-  d = math.sqrt(A.x*A.x + A.y*A.y)
-  --TODO partial translation when in atmosphere
+  local d = math.sqrt(A.x*A.x + A.y*A.y)
   if d >= p_radius + p_atmosphere then
     A.heading = math.atan2(A.y, A.x) + math.pi/2
+  else
+    local p = (d - p_radius) / p_atmosphere
+    A.heading = math.atan2(A.y, A.x) + math.pi/2 * p
   end
 end
 
@@ -66,7 +65,8 @@ local function update()
   end
 
   if lk.isDown("z") then
-    --TODO 20 should be modified based on distance
+    --NOTE varrying by distance needs to be logarythmic? linear leads to falloff of thrust far too quickly
+    --local d = math.sqrt(currentShip.x*currentShip.x + currentShip.y*currentShip.y) - p_radius + 0.01
     currentShip.v.x = currentShip.v.x + 20 * math.cos(currentShip.heading)
     currentShip.v.y = currentShip.v.y + 20 * math.sin(currentShip.heading)
   end
@@ -85,6 +85,7 @@ function love.draw()
 
   lg.setColor(200, 150, 100, 255)
   for i=1,#ships do
+    --TODO I would love to know how to calculate and show their orbits...
     lg.circle("fill", ships[i].x, ships[i].y, ships[i].radius)
   end
 
@@ -92,7 +93,11 @@ function love.draw()
   lg.circle("fill", 0, 0, p_radius)
   --TODO improve atmosphere rendering
   lg.setColor(0, 0, 100, 120)
-  lg.circle("fill", 0, 0, p_radius + p_atmosphere)
+  lg.circle("fill", 0, 0, p_radius + p_atmosphere*0.3)
+  lg.setColor(0, 0, 100, 60)
+  lg.circle("fill", 0, 0, p_radius + p_atmosphere*0.6)
+  lg.setColor(0, 0, 100, 30)
+  lg.circle("fill", 0, 0, p_radius + p_atmosphere*0.9)
 end
 
 function love.keypressed(key)
