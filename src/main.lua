@@ -2,7 +2,7 @@ local lg = love.graphics
 local lk = love.keyboard
 
 -- planetary mass, radius, atmospheric height, gravitational constant
-local p_mass, p_radius, p_atmosphere, G = 100000, 100, 20, 1
+local p_mass, p_radius, p_atmosphere = 100000, 100, 20
 
 local function Ship()
   local self = {}
@@ -22,7 +22,7 @@ local time, tick = 0, 1/30
 
 local function gravity(A)
   local d2 = A.x*A.x + A.y*A.y
-  local Fg = G * p_mass / d2
+  local Fg = p_mass / d2
   -- apply force
   local d = math.atan2(A.y, A.x)
   A.v.x = A.v.x - Fg * math.cos(d)
@@ -91,7 +91,6 @@ function love.draw()
 
   lg.setColor(0, 255, 0, 255)
   lg.circle("fill", 0, 0, p_radius)
-  --TODO improve atmosphere rendering
   lg.setColor(0, 0, 100, 120)
   lg.circle("fill", 0, 0, p_radius + p_atmosphere*0.3)
   lg.setColor(0, 0, 100, 60)
